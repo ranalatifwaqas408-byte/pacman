@@ -1,0 +1,182 @@
+Lab Report: Pac-Man Game Development in Java
+
+
+Course: Object-Oriented Programming
+Project Title: Console-Based Pac-Man Game
+Language: Java
+Submitted By: Latif Waqas
+Reg no: 2025-CYS-33
+
+1. Abstract
+This report presents the design and implementation of a simplified, text-based Pac-Man game using Java. The game features a hero character who navigates a maze, collects pellets, and avoids an enemy ghost. The primary focus is on demonstrating core Object-Oriented Programming (OOP) principles including encapsulation, modularity, and the effective use of Java Collections. The application runs in a console environment and provides real-time keyboard input for player movement.
+
+2. System Architecture
+The system follows a modular architecture with five primary classes, each handling a distinct responsibility. The architecture is event-driven, where user input triggers movement, collision detection, and game state updates.
+
+2.1 High-Level Architecture Diagram
+text
+                    +-------------------+
+                    |       MAIN        |
+                    |    (PacMan.java)  |
+                    +--------+----------+
+                             |
+                             | (orchestrates)
+                             v
++-------------------+    +-------------------+    +-------------------+
+|      Maze         |    |      Hero         |    |     Enemy         |
+|-------------------|    |-------------------|    |-------------------|
+| - grid: char[][]  |    | - row, col        |    | - row, col        |
+| - blocked()       |    | - points          |    | - randomMove()    |
+| - render()        |    | - movePlayer()    |    +-------------------+
+| - setup()         |    | - addPoint()      |
++-------------------+    +-------------------+
+                             |
+                             | (uses)
+                             v
+                    +-------------------+
+                    |     Pellet        |
+                    |-------------------|
+                    | - items: Set<String>|
+                    | - place()         |
+                    | - consume()       |
+                    | - finished()      |
+                    +-------------------+
+2.2 Class Responsibilities Table
+Class	Responsibility	Key Methods
+PacMan (Main)	Game loop orchestration, user input handling, win/loss conditions	main()
+Maze	Map storage, collision detection, visual rendering	setup(), render(), blocked()
+Hero	Player position, score tracking, movement logic	movePlayer(), addPoint()
+Enemy	Ghost AI (random movement), position tracking	randomMove()
+Pellet	Pellet storage using HashSet, consumption logic	place(), consume(), exists()
+3. Detailed Class Design
+3.1 PacMan (Main Driver)
+This class contains the game loop, which continues until either the player collides with the ghost or all pellets are collected.
+
+Key Logic Flow:
+
+java
+while (true) {
+    maze.render(player, ghost, pellets);  // Display game state
+    char key = input.next().charAt(0);    // Get user input
+    player.movePlayer(key, maze);          // Update player position
+    pellets.consume(...);                  // Check for pellet collection
+    ghost.randomMove(maze);                // Move enemy
+    // Collision & win checks
+}
+Design Choice: The main class acts solely as an orchestrator, delegating all domain logic to specialized classes.
+
+3.2 Maze Class
+The maze is stored as a 10×10 2D character array. The layout is hardcoded using a string array for simplicity and reproducibility.
+
+Collision Detection:
+
+java
+public boolean blocked(int x, int y) {
+    if (x < 0 || y < 0 || x >= r || y >= c) return true;
+    return grid[x][y] == '#';
+}
+Rendering Logic:
+
+C → Hero (Pac-Man)
+
+X → Ghost (Enemy)
+
+# → Wall
+
+. → Pellet (disappears when consumed)
+
+ (space) → Empty path
+
+3.3 Hero Class
+The hero maintains its coordinates and score. Movement is validated against maze walls before updating position.
+
+State Variables:
+
+Variable	Type	Description
+row	int	Current row index
+col	int	Current column index
+points	int	Number of pellets eaten
+3.4 Enemy Class
+The enemy implements simple random movement AI. At each turn, it randomly selects one of four directions (up, down, left, right). If the chosen direction leads to a wall, the ghost stays in place for that turn.
+
+Movement Directions:
+
+java
+int[][] moves = {{0,1}, {0,-1}, {1,0}, {-1,0}};
+// Right, Left, Down, Up
+3.5 Pellet Class (Using HashSet)
+This class demonstrates efficient use of Java Collections. Pellets are stored as string keys in a HashSet<String>.
+
+Why HashSet?
+
+O(1) average time complexity for add, remove, and contains operations
+
+Automatic duplicate prevention
+
+Simple key generation: row + "-" + col
+
+Key Methods:
+
+java
+public void place(int x, int y) { items.add(x + "-" + y); }
+public boolean consume(int x, int y) { return items.remove(x + "-" + y); }
+public boolean exists(int x, int y) { return items.contains(x + "-" + y); }
+public boolean finished() { return items.isEmpty(); }
+5. Data Structures Used
+Data Structure	Purpose	Complexity
+char[][]	Maze grid storage	O(1) access
+HashSet<String>	Pellet collection	O(1) avg. for add/remove/contains
+Scanner	User input handling	N/A
+Random	Ghost movement randomness	O(1)
+6. Sample Output
+text
+##########
+#C........#
+#.####...#
+#.#..#.#.#
+#.#..#.#.#
+#.####.#.#
+#........#
+#.######.#
+#.......X#
+##########
+Points: 3
+
+Move (W/A/S/D): s
+7. Limitations and Future Improvements
+Current Limitations
+Ghost AI: Random movement is not intelligent; ghosts do not chase the player.
+
+Fixed Maze Size: Maze dimensions are hardcoded (10×10).
+
+Console-Based: No graphical interface or sound effects.
+
+Single Enemy: Only one ghost exists in the game.
+
+Proposed Enhancements
+Enhancement	Description	Difficulty
+Chase AI	Implement BFS pathfinding so ghost follows player	Medium
+Multiple Enemies	Create an enemy list with independent movement	Easy
+Power Pellets	Add special pellets that allow eating ghosts	Medium
+Levels	Increase difficulty by speeding up ghosts	Easy
+GUI Version	Migrate to Swing/JavaFX for visual interface	Hard
+High Score	Save top scores to a file	Medium
+8. OOP Principles Demonstrated
+Principle	Implementation
+Encapsulation	All class fields are private with public getters
+Abstraction	Each class hides its internal logic (e.g., Pellet hides HashSet implementation)
+Single Responsibility	Maze handles rendering, Hero handles movement, Pellet handles collection
+Separation of Concerns	Game logic, rendering, and data storage are in separate classes
+
+
+Controls
+Key	Action
+W	Move Up
+A	Move Left
+S	Move Down
+D	Move Right
+9. Conclusion
+This project successfully implements a functional Pac-Man style game using core Java and Object-Oriented Programming principles. The architecture separates concerns effectively, making the code maintainable and extensible. The use of HashSet for pellet management demonstrates efficient data structure selection. While the current implementation is console-based with simple random ghost movement, it provides a solid foundation for future enhancements such as intelligent ghost AI, multiple levels, and graphical interfaces.
+
+
+
